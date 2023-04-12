@@ -2256,4 +2256,236 @@ mod tests {
         {"id":1,"catto":"jorts"}
         "###);
     }
+
+    #[test]
+    fn add_document_and_in_another_transform_add_it_again_then_delete_it() {
+        let mut index = TempIndex::new();
+        index.index_documents_config.update_method = IndexDocumentsMethod::UpdateDocuments;
+
+        let mut wtxn = index.write_txn().unwrap();
+        let builder = IndexDocuments::new(
+            &mut wtxn,
+            &index,
+            &index.indexer_config,
+            index.index_documents_config.clone(),
+            |_| (),
+            || false,
+        )
+        .unwrap();
+
+        let documents = documents!([
+            { "id": 1, "doggo": "kevin" },
+        ]);
+        let (builder, added) = builder.add_documents(documents).unwrap();
+        insta::assert_display_snapshot!(added.unwrap(), @"1");
+
+        let addition = builder.execute().unwrap();
+        insta::assert_debug_snapshot!(addition, @r###"
+        DocumentAdditionResult {
+            indexed_documents: 1,
+            number_of_documents: 1,
+        }
+        "###);
+        wtxn.commit().unwrap();
+
+        db_snap!(index, documents, @r###"
+        {"id":1,"doggo":"kevin"}
+        "###);
+
+        // A first batch of documents has been inserted
+
+        let mut wtxn = index.write_txn().unwrap();
+        let builder = IndexDocuments::new(
+            &mut wtxn,
+            &index,
+            &index.indexer_config,
+            index.index_documents_config.clone(),
+            |_| (),
+            || false,
+        )
+        .unwrap();
+
+        // add the same document
+        let documents = documents!([
+            { "id": 1, "doggo": "kevin" },
+        ]);
+        let (builder, added) = builder.add_documents(documents).unwrap();
+        insta::assert_display_snapshot!(added.unwrap(), @"1");
+
+        // and delete it
+        let (builder, removed) = builder.remove_documents(vec![S("1")]).unwrap();
+        insta::assert_display_snapshot!(removed.unwrap(), @"1");
+
+        let addition = builder.execute().unwrap();
+        insta::assert_debug_snapshot!(addition, @r###"
+        DocumentAdditionResult {
+            indexed_documents: 1,
+            number_of_documents: 0,
+        }
+        "###);
+        wtxn.commit().unwrap();
+
+        db_snap!(index, documents, @"");
+    }
+
+    #[test]
+    fn add_document_and_in_another_transform_add_it_again_then_delete_it_and_add_it_again() {
+        let mut index = TempIndex::new();
+        index.index_documents_config.update_method = IndexDocumentsMethod::UpdateDocuments;
+
+        let mut wtxn = index.write_txn().unwrap();
+        let builder = IndexDocuments::new(
+            &mut wtxn,
+            &index,
+            &index.indexer_config,
+            index.index_documents_config.clone(),
+            |_| (),
+            || false,
+        )
+        .unwrap();
+
+        let documents = documents!([
+            { "id": 1, "doggo": "kevin" },
+        ]);
+        let (builder, added) = builder.add_documents(documents).unwrap();
+        insta::assert_display_snapshot!(added.unwrap(), @"1");
+
+        let addition = builder.execute().unwrap();
+        insta::assert_debug_snapshot!(addition, @r###"
+        DocumentAdditionResult {
+            indexed_documents: 1,
+            number_of_documents: 1,
+        }
+        "###);
+        wtxn.commit().unwrap();
+
+        db_snap!(index, documents, @r###"
+        {"id":1,"doggo":"kevin"}
+        "###);
+
+        // A first batch of documents has been inserted
+
+        let mut wtxn = index.write_txn().unwrap();
+        let builder = IndexDocuments::new(
+            &mut wtxn,
+            &index,
+            &index.indexer_config,
+            index.index_documents_config.clone(),
+            |_| (),
+            || false,
+        )
+        .unwrap();
+
+        // add the same document
+        let documents = documents!([
+            { "id": 1, "doggo": "kevin" },
+        ]);
+        let (builder, added) = builder.add_documents(documents).unwrap();
+        insta::assert_display_snapshot!(added.unwrap(), @"1");
+
+        // and delete it
+        let (builder, removed) = builder.remove_documents(vec![S("1")]).unwrap();
+        insta::assert_display_snapshot!(removed.unwrap(), @"1");
+
+        // add it again
+        let documents = documents!([
+            { "id": 1, "doggo": "kevin" },
+        ]);
+        let (builder, added) = builder.add_documents(documents).unwrap();
+        insta::assert_display_snapshot!(added.unwrap(), @"1");
+
+        let addition = builder.execute().unwrap();
+        insta::assert_debug_snapshot!(addition, @r###"
+        DocumentAdditionResult {
+            indexed_documents: 2,
+            number_of_documents: 1,
+        }
+        "###);
+        wtxn.commit().unwrap();
+
+        db_snap!(index, documents, @r###"
+        {"id":1,"doggo":"kevin"}
+        "###);
+    }
+
+    #[test]
+    fn add_document_and_in_another_transform_delete_it_and_add_it_again() {
+        let mut index = TempIndex::new();
+        index.index_documents_config.update_method = IndexDocumentsMethod::UpdateDocuments;
+
+        let mut wtxn = index.write_txn().unwrap();
+        let builder = IndexDocuments::new(
+            &mut wtxn,
+            &index,
+            &index.indexer_config,
+            index.index_documents_config.clone(),
+            |_| (),
+            || false,
+        )
+        .unwrap();
+
+        let documents = documents!([
+            { "id": 1, "doggo": "kevin" },
+        ]);
+        let (builder, added) = builder.add_documents(documents).unwrap();
+        insta::assert_display_snapshot!(added.unwrap(), @"1");
+
+        let addition = builder.execute().unwrap();
+        insta::assert_debug_snapshot!(addition, @r###"
+        DocumentAdditionResult {
+            indexed_documents: 1,
+            number_of_documents: 1,
+        }
+        "###);
+        wtxn.commit().unwrap();
+
+        db_snap!(index, documents, @r###"
+        {"id":1,"doggo":"kevin"}
+        "###);
+
+        // A first batch of documents has been inserted
+
+        let mut wtxn = index.write_txn().unwrap();
+        let builder = IndexDocuments::new(
+            &mut wtxn,
+            &index,
+            &index.indexer_config,
+            index.index_documents_config.clone(),
+            |_| (),
+            || false,
+        )
+        .unwrap();
+
+        // delete it
+        let (builder, removed) = builder.remove_documents(vec![S("1")]).unwrap();
+        insta::assert_display_snapshot!(removed.unwrap(), @"1");
+
+        // and add it again
+        let documents = documents!([
+            { "id": 1, "doggo": "kevin" },
+        ]);
+        let (builder, added) = builder.add_documents(documents).unwrap();
+        insta::assert_display_snapshot!(added.unwrap(), @"1");
+
+        let addition = builder.execute().unwrap();
+        insta::assert_debug_snapshot!(addition, @r###"
+        DocumentAdditionResult {
+            indexed_documents: 1,
+            number_of_documents: 1,
+        }
+        "###);
+        wtxn.commit().unwrap();
+
+        db_snap!(index, documents, @r###"
+        {"id":1,"doggo":"kevin"}
+        "###);
+
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        for id in res.documents_ids {
+            // index.documents();
+            /// Here
+            todo!("here");
+        }
+    }
 }
