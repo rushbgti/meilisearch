@@ -1973,6 +1973,11 @@ mod tests {
         {"id":1,"doggo":"kevin"}
         {"id":3,"name":"jean","age":25}
         "###);
+
+        // Ensuring all the returned IDs actually exists
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 
     #[test]
@@ -2021,6 +2026,11 @@ mod tests {
         db_snap!(index, documents, @r###"
         {"id":3,"name":"jean","age":25,"legs":4}
         "###);
+
+        // Ensuring all the returned IDs actually exists
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 
     #[test]
@@ -2097,6 +2107,11 @@ mod tests {
         db_snap!(index, documents, @r###"
         {"id":3,"name":"jean","age":25,"legs":4}
         "###);
+
+        // Ensuring all the returned IDs actually exists
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 
     #[test]
@@ -2138,6 +2153,11 @@ mod tests {
         {"id":2,"doggo":{"name":"jean","age":20}}
         {"id":3,"name":"bob","age":25}
         "###);
+
+        // Ensuring all the returned IDs actually exists
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 
     #[test]
@@ -2184,6 +2204,11 @@ mod tests {
         db_snap!(index, documents, @r###"
         {"id":3,"name":"bob","age":25}
         "###);
+
+        // Ensuring all the returned IDs actually exists
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 
     #[test]
@@ -2255,6 +2280,11 @@ mod tests {
         db_snap!(index, documents, @r###"
         {"id":1,"catto":"jorts"}
         "###);
+
+        // Ensuring all the returned IDs actually exists
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 
     #[test]
@@ -2326,6 +2356,11 @@ mod tests {
         wtxn.commit().unwrap();
 
         db_snap!(index, documents, @"");
+
+        // Ensuring all the returned IDs actually exists
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 
     #[test]
@@ -2406,6 +2441,11 @@ mod tests {
         db_snap!(index, documents, @r###"
         {"id":1,"doggo":"kevin"}
         "###);
+
+        // Ensuring all the returned IDs actually exists
+        let rtxn = index.read_txn().unwrap();
+        let res = index.search(&rtxn).execute().unwrap();
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 
     #[test]
@@ -2480,12 +2520,9 @@ mod tests {
         {"id":1,"doggo":"kevin"}
         "###);
 
+        // Ensuring all the returned IDs actually exists
         let rtxn = index.read_txn().unwrap();
         let res = index.search(&rtxn).execute().unwrap();
-        for id in res.documents_ids {
-            // index.documents();
-            /// Here
-            todo!("here");
-        }
+        index.documents(&rtxn, res.documents_ids).unwrap();
     }
 }
